@@ -70,7 +70,6 @@ coverage
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 
 ## Editor dizinleri ve dosyaları
@@ -80,7 +79,6 @@ coverage
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 
 ## gRPC & Protobuf
