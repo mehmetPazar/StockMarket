@@ -1,0 +1,118 @@
+# .NET Core & Visual Studio
+## Derleme sonuçları
+bin/
+obj/
+out/
+
+## Visual Studio dosyaları
+.vs/
+**/*.user
+**/*.userosscache
+**/*.sln.docstates
+**/*.dbmdl
+**/*.jfm
+
+## Rider dosyaları
+.idea/
+*.sln.iml
+
+## VS Code dizinleri
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# .NET Scaffolding
+ScaffoldingReadMe.txt
+
+# ASP.NET Core
+**/Properties/launchSettings.json
+**/appsettings.Development.json
+*.Development.json
+
+# Visual Studio tarafından oluşturulan dosyalar
+.ntvs_analysis.dat
+node_repl_history
+**/project.lock.json
+**/project.fragment.lock.json
+**/artifacts/
+
+# .NET Core artefaktları
+*.swp
+*.dll
+*.exe
+*.pdb
+*.dll.config
+*.so
+*.dylib
+
+# Vue.js & Node.js
+## Log dosyaları
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+## Node.js bağımlılıkları
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+.temp
+
+## JS artefaktları
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+## Editor dizinleri ve dosyaları
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+## gRPC & Protobuf
+**/src/protos/*.js
+**/src/protos/*.ts
+!**/src/protos/index.ts
+
+## Derleme önbelleği dizinleri
+.npm
+.eslintcache
+.stylelintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+## Vite
+.vite/
+
+## Yerel env dosyaları
+.env
+.env.*
+!.env.example
+
+## Cypress
+cypress/videos/
+cypress/screenshots/
+
+## Diğer artefaktlar ve dosyalar
+*~
+*.bak
+Thumbs.db
+*.tmp
+*.bk
+*.swp 
