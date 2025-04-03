@@ -4,29 +4,29 @@ option csharp_namespace = "StockMarket.GrpcService";
 
 package stock;
 
-// Hisse senedi servis tanımı
+// Stock service definition
 service StockService {
-  // Tek bir hisse senedi bilgisi alma
+  // Get a single stock information
   rpc GetStock (StockRequest) returns (StockResponse);
   
-  // Belirli bir hisse senedi için canlı veri akışı
+  // Live data stream for a specific stock
   rpc StreamStockPrice (StockRequest) returns (stream StockPriceUpdate);
   
-  // Birden fazla hisse senedi için canlı veri akışı
+  // Live data stream for multiple stocks
   rpc StreamMultipleStocks (MultiStockRequest) returns (stream StockPriceUpdate);
 }
 
-// Hisse senedi istek mesajı
+// Stock request message
 message StockRequest {
   string symbol = 1;
 }
 
-// Birden fazla hisse senedi istek mesajı
+// Multiple stock request message
 message MultiStockRequest {
   repeated string symbols = 1;
 }
 
-// Hisse senedi yanıt mesajı (tam bilgi)
+// Stock response message (full information)
 message StockResponse {
   string symbol = 1;
   double price = 2;
@@ -40,7 +40,7 @@ message StockResponse {
   string market_cap = 10;
 }
 
-// Hisse senedi fiyat güncellemesi (canlı akış için)
+// Stock price update (for live stream)
 message StockPriceUpdate {
   string symbol = 1;
   double price = 2;

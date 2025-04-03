@@ -1,16 +1,16 @@
 <template>
   <div class="stock-stream">
-    <h2>Canlı Hisse Takibi (gRPC)</h2>
+    <h2>Live Stock Tracking (gRPC)</h2>
     
     <div class="controls">
       <div class="symbol-select">
-        <label for="stockSelect">Takip Edilecek Hisseler:</label>
+        <label for="stockSelect">Stocks to Track:</label>
         <div class="select-group">
           <select id="stockSelect" v-model="selectedSymbol">
             <option v-for="stock in availableStocks" :key="stock" :value="stock">{{ stock }}</option>
           </select>
           <button @click="addSymbol" :disabled="!selectedSymbol || watchedSymbols.includes(selectedSymbol)">
-            Ekle
+            Add
           </button>
         </div>
       </div>
@@ -24,31 +24,31 @@
     </div>
     
     <div v-if="connectionStatus === 'connecting'" class="status connecting">
-      Bağlanıyor...
+      Connecting...
     </div>
     <div v-else-if="connectionStatus === 'error'" class="status error">
-      Bağlantı hatası. Lütfen tekrar deneyin.
+      Connection error. Please try again.
     </div>
     <div v-else-if="connectionStatus === 'connected' && watchedSymbols.length === 0" class="status empty">
-      Lütfen takip etmek istediğiniz hisseleri ekleyin.
+      Please add stocks you want to track.
     </div>
     
     <div class="stock-table-container" v-else>
       <table class="stock-table">
         <thead>
           <tr>
-            <th>Sembol</th>
-            <th>Fiyat</th>
-            <th>Değişim</th>
-            <th>Değişim %</th>
-            <th>Son Güncelleme</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Change</th>
+            <th>Change %</th>
+            <th>Last Update</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(stock, symbol) in stockUpdates" :key="symbol" :class="{ 'up': stock.change > 0, 'down': stock.change < 0 }">
             <td>{{ symbol }}</td>
-            <td>{{ stock.price.toFixed(2) }} TL</td>
-            <td>{{ stock.change.toFixed(2) }} TL</td>
+            <td>${{ stock.price.toFixed(2) }}</td>
+            <td>${{ stock.change.toFixed(2) }}</td>
             <td>{{ stock.changePercent.toFixed(2) }}%</td>
             <td>{{ formatTime(stock.timestamp) }}</td>
           </tr>
@@ -56,7 +56,7 @@
       </table>
     </div>
 
-    <!-- Fiyat Grafik Bileşeni -->
+    <!-- Price Chart Component -->
     <div v-if="watchedSymbols.length > 0" class="charts-container">
       <StockPriceChart 
         v-for="symbol in watchedSymbols" 
@@ -73,7 +73,7 @@ import { ref, onMounted, onUnmounted, computed, defineAsyncComponent } from 'vue
 import stockService from '../services/stockService';
 import type { Stock } from '../services/stockService';
 
-// Grafik bileşeni lazy loading ile yükleniyor
+// Load chart component lazily
 const StockPriceChart = defineAsyncComponent(() => 
   import('./charts/StockPriceChart.vue')
 );
@@ -82,13 +82,13 @@ defineOptions({
   name: 'StockStream'
 });
 
-// Kullanılabilir hisse senetleri
+// Available stocks
 const availableStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA'];
 const selectedSymbol = ref('');
 const watchedSymbols = ref<string[]>([]);
 const connectionStatus = ref<'connecting' | 'connected' | 'error'>('connecting');
 
-// Stock verileri için tip tanımı
+// Type definition for stock data
 interface StockData {
   price: number;
   change: number;
@@ -99,52 +99,52 @@ interface StockData {
 const stockUpdates = ref<Record<string, StockData>>({});
 let unsubscribeFn: (() => void) | null = null;
 
-// Sembolleri izleme listesine ekle
+// Add symbols to watch list
 const addSymbol = () => {
   if (selectedSymbol.value && !watchedSymbols.value.includes(selectedSymbol.value)) {
-    console.log(`[Vue] Yeni sembol ekleniyor: ${selectedSymbol.value}`);
+    console.log(`[Vue] Adding new symbol: ${selectedSymbol.value}`);
     watchedSymbols.value.push(selectedSymbol.value);
     updateSubscription();
     selectedSymbol.value = '';
   }
 };
 
-// Sembolleri izleme listesinden çıkar
+// Remove symbols from watch list
 const removeSymbol = (symbol: string) => {
-  console.log(`[Vue] Sembol kaldırılıyor: ${symbol}`);
+  console.log(`[Vue] Removing symbol: ${symbol}`);
   watchedSymbols.value = watchedSymbols.value.filter(s => s !== symbol);
   
-  // Stock güncellemelerinden kaldır
+  // Remove from stock updates
   const updates = { ...stockUpdates.value };
   delete updates[symbol];
   stockUpdates.value = updates;
   
-  // Aboneliği güncelle
+  // Update subscription
   updateSubscription();
 };
 
-// gRPC aboneliğini güncelle
+// Update gRPC subscription
 const updateSubscription = () => {
-  // Mevcut aboneliği temizle
+  // Clear existing subscription
   if (unsubscribeFn) {
-    console.log('[Vue] Mevcut hisse akışı aboneliği sonlandırılıyor');
+    console.log('[Vue] Ending current stock stream subscription');
     unsubscribeFn();
     unsubscribeFn = null;
   }
   
-  // İzlenen sembol yoksa aboneliği sonlandır
+  // End subscription if no symbols are watched
   if (watchedSymbols.value.length === 0) {
-    console.log('[Vue] İzlenen sembol olmadığı için abonelik oluşturulmadı');
+    console.log('[Vue] No subscription created as no symbols are being watched');
     return;
   }
   
-  // Yeni abonelik oluştur
-  console.log(`[Vue] Yeni hisse akışı aboneliği başlatılıyor: ${watchedSymbols.value.join(', ')}`);
+  // Create new subscription
+  console.log(`[Vue] Starting new stock stream subscription: ${watchedSymbols.value.join(', ')}`);
   
-  // Abonelik başlangıcında tüm hisseleri al
+  // Get all stocks at subscription start
   stockService.getAllStocks().then(stocks => {
-    console.log(`[Vue] İlk hisse verileri alındı: ${stocks.length} adet hisse`);
-    // Sadece izlenen sembolleri filtrele
+    console.log(`[Vue] Initial stock data received: ${stocks.length} stocks`);
+    // Filter only watched symbols
     const filteredStocks = stocks.filter(stock => watchedSymbols.value.includes(stock.symbol));
     
     filteredStocks.forEach(stockData => {
@@ -157,11 +157,11 @@ const updateSubscription = () => {
     });
   });
   
-  // Canlı güncellemelere abone ol
+  // Subscribe to live updates
   unsubscribeFn = stockService.subscribeToStockUpdates(watchedSymbols.value, (stock) => {
-    console.log(`[Vue] Hisse güncellemesi alındı: ${stock.symbol}, fiyat: ${stock.price.toFixed(2)}, değişim: ${stock.change.toFixed(2)}`);
+    console.log(`[Vue] Stock update received: ${stock.symbol}, price: ${stock.price.toFixed(2)}, change: ${stock.change.toFixed(2)}`);
     
-    // Reaktif güncelleme sorunlarını önlemek için kopya oluştur
+    // Create copy to prevent reactive update issues
     const updatedStocks = { ...stockUpdates.value };
     updatedStocks[stock.symbol] = {
       price: stock.price,
@@ -170,12 +170,12 @@ const updateSubscription = () => {
       timestamp: new Date(stock.lastUpdated).getTime() / 1000
     };
     
-    // Tek seferde güncelle
+    // Update all at once
     stockUpdates.value = updatedStocks;
   });
 };
 
-// Zaman formatlama
+// Time formatting
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp * 1000);
   const hours = date.getHours().toString().padStart(2, '0');
@@ -184,20 +184,20 @@ const formatTime = (timestamp: number): string => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-// Component temizliği
+// Component cleanup
 onUnmounted(() => {
-  console.log('[Vue] StockStream bileşeni kaldırılıyor, abonelikler sonlandırılıyor');
+  console.log('[Vue] StockStream component unmounting, cleaning up subscriptions');
   if (unsubscribeFn) {
     unsubscribeFn();
     unsubscribeFn = null;
   }
 });
 
-// İlk yükleme sırasında bağlantı durumunu simüle et
+// Simulate connection status during initial load
 onMounted(() => {
-  console.log('[Vue] StockStream bileşeni yüklendi, bağlantı başlatılıyor');
+  console.log('[Vue] StockStream component mounted, initializing connection');
   setTimeout(() => {
-    console.log('[Vue] Bağlantı durumu "connected" olarak güncellendi');
+    console.log('[Vue] Connection status updated to "connected"');
     connectionStatus.value = 'connected';
   }, 1000);
 });
@@ -255,7 +255,7 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  background-color: #95a5a6;
+  background-color: #bdc3c7;
   cursor: not-allowed;
 }
 
@@ -268,21 +268,29 @@ button:disabled {
 .watched-symbol {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
   background-color: #f8f9fa;
-  padding: 0.5rem 0.75rem;
   border-radius: 4px;
   border: 1px solid #ddd;
 }
 
 .remove-btn {
-  background: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #666;
+  font-size: 1.2rem;
   border: none;
+}
+
+.remove-btn:hover {
   color: #e74c3c;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  font-size: 1.25rem;
-  font-weight: bold;
-  padding: 0 0.25rem;
+  background-color: transparent;
 }
 
 .status {
@@ -293,21 +301,22 @@ button:disabled {
 }
 
 .connecting {
-  background-color: #fef9e7;
-  color: #7e5c00;
+  background-color: #f8f9fa;
+  color: #666;
 }
 
 .error {
-  background-color: #fdedec;
-  color: #c0392b;
+  background-color: #fee;
+  color: #e74c3c;
 }
 
 .empty {
-  background-color: #eaf2f8;
-  color: #2980b9;
+  background-color: #f8f9fa;
+  color: #666;
 }
 
 .stock-table-container {
+  margin-top: 1rem;
   overflow-x: auto;
 }
 
@@ -316,8 +325,9 @@ button:disabled {
   border-collapse: collapse;
 }
 
-.stock-table th, .stock-table td {
-  padding: 0.75rem 1rem;
+.stock-table th,
+.stock-table td {
+  padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
@@ -325,11 +335,6 @@ button:disabled {
 .stock-table th {
   background-color: #f8f9fa;
   font-weight: bold;
-  color: #2c3e50;
-}
-
-.stock-table tr:last-child td {
-  border-bottom: none;
 }
 
 .up {
@@ -341,19 +346,27 @@ button:disabled {
 }
 
 .charts-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
   margin-top: 2rem;
-}
-
-@media (min-width: 768px) {
-  .charts-container {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
 }
 
 .stock-chart-item {
-  min-height: 300px;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+  .stock-table {
+    font-size: 0.9rem;
+  }
+  
+  .stock-table th,
+  .stock-table td {
+    padding: 0.5rem;
+  }
 }
 </style> 

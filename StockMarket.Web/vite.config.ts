@@ -18,7 +18,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
-    // Proxy yerine doğrudan API adreslerini kullanacağız
+    // We'll use direct API addresses instead of a proxy
     cors: true
   }
 }) 

@@ -1,31 +1,31 @@
 <template>
   <div class="stock-list">
-    <h2>Hisse Senetleri</h2>
+    <h2>Stocks</h2>
     
     <div class="loader" v-if="loading">
       <div class="spinner"></div>
-      <p>Hisse senedi verileri yükleniyor...</p>
+      <p>Loading stock data...</p>
     </div>
     
     <div class="error" v-else-if="error">
-      <h3>Bağlantı Hatası</h3>
+      <h3>Connection Error</h3>
       <p>{{ error }}</p>
-      <button @click="fetchStocks" class="retry-button">Tekrar Dene</button>
+      <button @click="fetchStocks" class="retry-button">Retry</button>
     </div>
     
     <div class="empty-state" v-else-if="stocks.length === 0">
-      <p>Henüz hiç hisse senedi verisi bulunamadı.</p>
-      <button @click="fetchStocks" class="retry-button">Yenile</button>
+      <p>No stock data found yet.</p>
+      <button @click="fetchStocks" class="retry-button">Refresh</button>
     </div>
     
     <table v-else>
       <thead>
         <tr>
-          <th>Sembol</th>
-          <th>Şirket</th>
-          <th>Fiyat (TL)</th>
-          <th>Değişim (%)</th>
-          <th>Hacim</th>
+          <th>Symbol</th>
+          <th>Company</th>
+          <th>Price ($)</th>
+          <th>Change (%)</th>
+          <th>Volume</th>
         </tr>
       </thead>
       <tbody>
@@ -42,9 +42,9 @@
     </table>
     
     <div class="refresh-container" v-if="stocks.length > 0">
-      <p>Son güncelleme: {{ lastUpdateTime }}</p>
+      <p>Last update: {{ lastUpdateTime }}</p>
       <button @click="fetchStocks" class="refresh-button">
-        <span>Yenile</span>
+        <span>Refresh</span>
       </button>
     </div>
   </div>
@@ -65,13 +65,13 @@ const error = ref<string | null>(null);
 const lastUpdate = ref<Date>(new Date());
 let unsubscribe: (() => void) | null = null;
 
-// İnsan tarafından okunabilir son güncelleme zamanı
+// Human-readable last update time
 const lastUpdateTime = computed(() => {
   const now = new Date();
   const diff = Math.floor((now.getTime() - lastUpdate.value.getTime()) / 1000);
   
-  if (diff < 60) return `${diff} saniye önce`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} dakika önce`;
+  if (diff < 60) return `${diff} seconds ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
   return lastUpdate.value.toLocaleTimeString();
 });
 
@@ -80,43 +80,43 @@ const fetchStocks = async () => {
     loading.value = true;
     error.value = null;
     
-    console.log('StockList: Hisse senetleri alınıyor...');
+    console.log('StockList: Fetching stocks...');
     stocks.value = await stockService.getAllStocks();
     lastUpdate.value = new Date();
     
-    console.log(`StockList: ${stocks.value.length} hisse senedi alındı`);
+    console.log(`StockList: Received ${stocks.value.length} stocks`);
     
-    // Gerçek zamanlı güncellemeler için abone ol
+    // Subscribe to real-time updates
     if (stocks.value.length > 0) {
       const symbols = stocks.value.map(stock => stock.symbol);
       subscribeToUpdates(symbols);
     }
   } catch (err) {
-    console.error('StockList: Hisse senedi verileri alınamadı', err);
-    error.value = 'Hisse senedi verileri yüklenirken bir hata oluştu. Sunucu bağlantısını kontrol edin.';
+    console.error('StockList: Failed to fetch stock data', err);
+    error.value = 'An error occurred while loading stock data. Please check server connection.';
   } finally {
     loading.value = false;
   }
 };
 
 const subscribeToUpdates = (symbols: string[]) => {
-  // Önceki aboneliği temizle
+  // Clear previous subscription
   if (unsubscribe) {
     unsubscribe();
     unsubscribe = null;
   }
   
-  console.log(`StockList: ${symbols.length} sembol için gerçek zamanlı güncellemelere abone olunuyor`);
+  console.log(`StockList: Subscribing to real-time updates for ${symbols.length} symbols`);
   unsubscribe = stockService.subscribeToStockUpdates(symbols, (updatedStock) => {
-    console.log(`StockList: ${updatedStock.symbol} için güncelleme alındı`);
+    console.log(`StockList: Received update for ${updatedStock.symbol}`);
     lastUpdate.value = new Date();
     
-    // Listedeki hisseyi güncelle
+    // Update stock in the list
     const index = stocks.value.findIndex(stock => stock.symbol === updatedStock.symbol);
     if (index !== -1) {
       stocks.value[index] = updatedStock;
     } else {
-      // Eğer listede yoksa ekle
+      // Add if not in list
       stocks.value.push(updatedStock);
     }
   });
@@ -125,13 +125,13 @@ const subscribeToUpdates = (symbols: string[]) => {
 onMounted(() => {
   fetchStocks();
   
-  // 60 saniyede bir otomatik yenileme
+  // Auto-refresh every 60 seconds
   const refreshInterval = setInterval(() => {
     const timeSinceLastUpdate = (new Date().getTime() - lastUpdate.value.getTime()) / 1000;
     
-    // Son 30 saniyedir güncelleme alınmadıysa
+    // If no updates received in last 30 seconds
     if (timeSinceLastUpdate > 30) {
-      console.log('StockList: Uzun süredir güncelleme alınamadı, yenileniyor...');
+      console.log('StockList: No updates received for a while, refreshing...');
       fetchStocks();
     }
   }, 60 * 1000);
@@ -139,7 +139,7 @@ onMounted(() => {
   onUnmounted(() => {
     clearInterval(refreshInterval);
     if (unsubscribe) {
-      console.log('StockList: Abonelikler sonlandırılıyor');
+      console.log('StockList: Cleaning up subscriptions');
       unsubscribe();
       unsubscribe = null;
     }
@@ -250,9 +250,27 @@ tr:hover {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .refresh-button:hover {
   background-color: #0056b3;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style> 

@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <header>
-      <h1>Borsa Takip Uygulaması</h1>
+      <h1>Stock Market Tracking Application</h1>
     </header>
 
     <main>
@@ -16,7 +16,7 @@
     </main>
 
     <footer>
-      <p>&copy; 2023 Borsa Takip Uygulaması</p>
+      <p>&copy; 2023 Stock Market Tracking Application</p>
     </footer>
   </div>
 </template>
@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
 
-// Componentleri asenkron olarak yükle
+// Load components asynchronously
 const StockList = defineAsyncComponent(() => import('./components/StockList.vue'));
 const StockStream = defineAsyncComponent(() => import('./components/StockStream.vue'));
 </script>

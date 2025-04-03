@@ -19,7 +19,7 @@
   --color-warning: #f39c12;
 }
 
-/* Temel Font ve Padding Reset */
+/* Basic Font and Padding Reset */
 * {
   margin: 0;
   padding: 0;
@@ -33,7 +33,7 @@ body {
   background-color: var(--color-background);
 }
 
-/* Temel Tipografi */
+/* Basic Typography */
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
   color: var(--color-primary);
@@ -77,7 +77,7 @@ button:disabled, .btn:disabled {
   cursor: not-allowed;
 }
 
-/* Yardımcı Sınıflar */
+/* Helper Classes */
 .text-center {
   text-align: center;
 }

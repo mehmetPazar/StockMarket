@@ -1,7 +1,7 @@
 <template>
   <div class="chart-container">
-    <h3>{{ symbol }} Fiyat Grafiği</h3>
-    <div v-if="loading" class="loading">Grafik yükleniyor...</div>
+    <h3>{{ symbol }} Price Chart</h3>
+    <div v-if="loading" class="loading">Loading chart...</div>
     <div v-else class="canvas-container">
       <canvas ref="chartCanvas"></canvas>
     </div>
@@ -14,74 +14,74 @@ import { Chart, registerables } from 'chart.js';
 import stockService from '../../services/stockService';
 import type { Stock } from '../../services/stockService';
 
-// Chart.js registerables'ları kaydet
+// Register Chart.js registerables
 Chart.register(...registerables);
 
-// Component props tanımlama
+// Component props definition
 const props = defineProps<{
   symbol: string;
 }>();
 
 const { symbol } = toRefs(props);
 
-// Chart ve UI referansları
+// Chart and UI references
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
 const loading = ref(true);
-let chartInstance: Chart | null = null; // Reaktif olmayan chart referansı
+let chartInstance: Chart | null = null; // Non-reactive chart reference
 
-// Veri noktaları için state - mutable
+// State for data points - mutable
 const priceData = ref<number[]>([]);
 const timeLabels = ref<string[]>([]);
-const maxDataPoints = 30; // Grafikte gösterilecek maksimum veri noktası
+const maxDataPoints = 30; // Maximum data points to show in chart
 
-// Unsubscribe fonksiyonu
+// Unsubscribe function
 let unsubscribe: (() => void) | null = null;
 
-// Grafik yeniden oluşturma fonksiyonu - daha basit ve güvenli
+// Chart rendering function - simpler and safer
 const renderChart = async () => {
-  // Canvas hazır değilse bekleme
+  // Wait if canvas is not ready
   if (!chartCanvas.value) {
-    console.warn('Canvas henüz hazır değil');
+    console.warn('Canvas is not ready yet');
     return;
   }
   
-  // Veri yoksa bekleme
+  // Wait if no data
   if (priceData.value.length === 0) {
-    console.log('Grafik verisi henüz yok');
+    console.log('No chart data yet');
     return;
   }
   
-  // Önceki grafiği temizle
+  // Clear previous chart
   if (chartInstance) {
     try {
       chartInstance.destroy();
     } catch (error) {
-      console.error('Grafik temizleme hatası:', error);
+      console.error('Error clearing chart:', error);
     }
     chartInstance = null;
   }
   
-  // DOM güncellemesi için bekle
+  // Wait for DOM update
   await nextTick();
   
   try {
-    // Değişmez veri kopyaları oluştur
+    // Create immutable data copies
     const labels = [...timeLabels.value];
     const prices = [...priceData.value];
     
     const ctx = chartCanvas.value.getContext('2d');
     if (!ctx) {
-      console.error('Canvas context alınamadı');
+      console.error('Could not get canvas context');
       return;
     }
     
-    // Yeni chart oluştur
+    // Create new chart
     chartInstance = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets: [{
-          label: `${symbol.value} Fiyat (TL)`,
+          label: `${symbol.value} Price ($)`,
           data: prices,
           borderColor: '#3498db',
           backgroundColor: 'rgba(52, 152, 219, 0.1)',
@@ -100,7 +100,7 @@ const renderChart = async () => {
             beginAtZero: false,
             ticks: {
               callback: function(value) {
-                return value + ' TL';
+                return '$' + value;
               }
             }
           },
@@ -114,7 +114,7 @@ const renderChart = async () => {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return 'Fiyat: ' + context.raw + ' TL';
+                return 'Price: $' + context.raw;
               }
             }
           },
@@ -129,20 +129,20 @@ const renderChart = async () => {
       }
     });
     
-    console.log('Grafik başarıyla oluşturuldu');
+    console.log('Chart created successfully');
   } catch (error) {
-    console.error('Grafik oluşturma hatası:', error);
+    console.error('Error creating chart:', error);
   }
 };
 
-// Veri noktası ekleme - basitleştirilmiş
+// Add data point - simplified
 const addDataPoint = (price: number, time: string) => {
   try {
-    // Yeni dizileri hesapla (değişmez)
+    // Calculate new arrays (immutable)
     let newPrices = [...priceData.value];
     let newLabels = [...timeLabels.value];
     
-    // Maksimum veri noktası sınırı
+    // Maximum data points limit
     if (newPrices.length >= maxDataPoints) {
       newPrices = [...newPrices.slice(1), price]; 
       newLabels = [...newLabels.slice(1), time];
@@ -151,104 +151,104 @@ const addDataPoint = (price: number, time: string) => {
       newLabels.push(time);
     }
     
-    // State'i güncelle
+    // Update state
     priceData.value = newPrices;
     timeLabels.value = newLabels;
     
-    // Graf varsa ve güncelleme güvenliyse
+    // If chart exists and update is safe
     if (chartInstance && chartInstance.data && chartInstance.data.datasets[0]) {
-      // Graf verilerini güncelle
+      // Update chart data
       chartInstance.data.labels = [...newLabels];
       chartInstance.data.datasets[0].data = [...newPrices];
-      chartInstance.update('none'); // Animasyonsuz güncelleme
+      chartInstance.update('none'); // Update without animation
     } else {
-      // Graf yoksa yeniden oluştur
+      // Recreate chart if it doesn't exist
       renderChart();
     }
   } catch (error) {
-    console.error('Veri ekleme hatası:', error);
+    console.error('Error adding data:', error);
     
-    // Hata durumunda grafiği yeniden oluşturmayı dene
+    // Try to recreate chart on error
     renderChart();
   }
 };
 
-// Hisse takibini başlat
+// Start stock tracking
 const startTracking = () => {
-  // Önceki takibi temizle
+  // Clear previous tracking
   if (unsubscribe) {
     unsubscribe();
     unsubscribe = null;
   }
   
-  // Verileri sıfırla
+  // Reset data
   priceData.value = [];
   timeLabels.value = [];
   
-  // Yükleme durumunu göster
+  // Show loading state
   loading.value = true;
   
-  // İlk verileri al
+  // Get initial data
   stockService.getStockBySymbol(symbol.value)
     .then((stock) => {
       if (stock) {
-        // İlk veriyi ekle
+        // Add initial data
         addDataPoint(stock.price, formatTime(new Date(stock.lastUpdated)));
         
-        // Yükleme tamamlandı
+        // Loading complete
         loading.value = false;
         
-        // Graf oluştur
+        // Create chart
         renderChart();
       }
     })
     .catch((error) => {
-      console.error(`${symbol.value} için veri alınamadı:`, error);
+      console.error(`Could not get data for ${symbol.value}:`, error);
       loading.value = false;
     });
   
-  // Canlı güncellemelere abone ol
+  // Subscribe to live updates
   unsubscribe = stockService.subscribeToStockUpdates([symbol.value], (stock) => {
     try {
-      // Yeni veri ekle
+      // Add new data
       addDataPoint(stock.price, formatTime(new Date(stock.lastUpdated)));
     } catch (error) {
-      console.error('Hisse güncellemesi işlenemedi:', error);
+      console.error('Could not process stock update:', error);
     }
   });
 };
 
-// Zaman formatlama fonksiyonu
+// Time formatting function
 const formatTime = (date: Date): string => {
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 };
 
-// Symbol değişince takibi güncelle
+// Update tracking when symbol changes
 watch(symbol, () => {
   loading.value = true;
   startTracking();
 });
 
-// Component temizliği
+// Component cleanup
 onUnmounted(() => {
-  // Takibi durdur
+  // Stop tracking
   if (unsubscribe) {
     unsubscribe();
     unsubscribe = null;
   }
   
-  // Grafiği temizle
+  // Clear chart
   if (chartInstance) {
     try {
       chartInstance.destroy();
     } catch (error) {
-      console.error('Grafik temizlenemedi:', error);
+      console.error('Could not clear chart:', error);
     }
     chartInstance = null;
   }
 });
 
-// Component yüklendiğinde takibi başlat
+// Component mounted
 onMounted(() => {
   startTracking();
 });
@@ -257,38 +257,36 @@ onMounted(() => {
 <style scoped>
 .chart-container {
   position: relative;
-  height: 300px;
   width: 100%;
-  margin-top: 1rem;
+  height: 300px;
+  padding: 1rem;
   background-color: white;
   border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
   color: #2c3e50;
-  text-align: center;
 }
 
 .loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
   font-style: italic;
-  color: #7f8c8d;
 }
 
 .canvas-container {
-  position: relative;
-  height: 250px;
   width: 100%;
+  height: calc(100% - 2rem);
 }
 
 canvas {
-  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 </style> 

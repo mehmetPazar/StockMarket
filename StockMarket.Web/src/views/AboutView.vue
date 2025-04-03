@@ -1,23 +1,23 @@
 <template>
   <div class="about">
-    <h1>Hakkımızda</h1>
+    <h1>About Us</h1>
     <p>
-      Bu uygulama, borsa işlemlerinizi takip etmek, portföyünüzü yönetmek ve piyasa analizlerini 
-      görüntülemek için tasarlanmış modern bir çözümdür.
+      This application is a modern solution designed to track your stock market transactions, 
+      manage your portfolio, and view market analyses.
     </p>
     
-    <h2>Teknolojik Altyapı</h2>
+    <h2>Technology Infrastructure</h2>
     <ul>
       <li><strong>Frontend:</strong> Vue.js, TypeScript</li>
       <li><strong>Backend:</strong> .NET 8, ASP.NET Core Web API</li>
-      <li><strong>Mimari:</strong> .NET Aspire ile mikro servis mimarisi</li>
-      <li><strong>Veri Akışı:</strong> YARP API Gateway ile yönlendirme</li>
+      <li><strong>Architecture:</strong> Microservice architecture with .NET Aspire</li>
+      <li><strong>Data Flow:</strong> Routing with YARP API Gateway</li>
     </ul>
     
-    <h2>İletişim</h2>
+    <h2>Contact</h2>
     <p>
-      Soru, öneri ve geri bildirimleriniz için bizimle iletişime geçmekten çekinmeyin.
-      <a href="mailto:info@borsaapp.com">info@borsaapp.com</a>
+      Don't hesitate to contact us for questions, suggestions, and feedback.
+      <a href="mailto:info@stockapp.com">info@stockapp.com</a>
     </p>
   </div>
 </template>

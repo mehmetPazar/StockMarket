@@ -5,12 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
 
-// Loglama ayarlarını yapılandır
+// Configure logging settings
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
-// Kendi gRPC servislerimizin log seviyesini Information olarak ayarla
+// Set log level for our own gRPC services to Information
 builder.Logging.AddFilter("StockMarket.GrpcService.Services", LogLevel.Information);
 
 // Add services to the container.
@@ -21,33 +21,33 @@ builder.Services.AddGrpc(options =>
     options.MaxSendMessageSize = 16 * 1024 * 1024; // 16 MB
 });
 
-// StockDataService'i ekle
+// Add StockDataService
 builder.Services.AddSingleton<StockDataService>();
 
-// Controller ve API desteği ekle
+// Add controller and API support
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS servislerini ekle - bu hem REST hem de gRPC için gerekli
+// Add CORS services - this is required for both REST and gRPC
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.SetIsOriginAllowed(_ => true) // Tüm originlere izin ver (geliştirme ortamı için)
+        policy.SetIsOriginAllowed(_ => true) // Allow all origins (for development environment)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials() // SSE için gerekli
+              .AllowCredentials() // Required for SSE
               .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding", "Content-Type");
     });
 });
 
 var app = builder.Build();
 
-// Console log ile gRPC servisinin başlatıldığını bildir
-Console.WriteLine($"=== gRPC Servisi Başlatılıyor - {DateTime.Now} ===");
+// Log gRPC service startup with console
+Console.WriteLine($"=== gRPC Service Starting - {DateTime.Now} ===");
 
-// CORS middleware'i ekle - önemli: CORS middleware'ini pipeline'ın başına koy
+// Add CORS middleware - important: put CORS middleware at the beginning of the pipeline
 app.UseCors();
 
 // Configure the HTTP request pipeline.
@@ -60,13 +60,13 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseAuthorization();
 
-// Controller ve gRPC servislerini etkinleştir
+// Enable controller and gRPC services
 app.MapControllers();
 app.MapGrpcService<GreeterService>();
 app.MapGrpcService<StockService>();
 
-// Swagger/API dokümanları ve tanıtım için başlangıç sayfası
-app.MapGet("/", () => "gRPC Stock Market Servisi\ngRPC: https://localhost:5207\nREST API: /swagger");
+// Start page for Swagger/API documentation and introduction
+app.MapGet("/", () => "gRPC Stock Market Service\ngRPC: https://localhost:5207\nREST API: /swagger");
 
 app.MapDefaultEndpoints();
 

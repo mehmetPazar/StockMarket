@@ -1,7 +1,7 @@
 <template>
   <div class="home">
-    <h1>Borsa Uygulaması</h1>
-    <p>Hoş Geldiniz! Bu uygulama ile borsa verilerini takip edebilirsiniz.</p>
+    <h1>Stock Market Application</h1>
+    <p>Welcome! With this application, you can track stock market data.</p>
     
     <StockStream />
     
@@ -9,18 +9,18 @@
     
     <div class="features">
       <div class="feature-card">
-        <h3>Hisse Takibi</h3>
-        <p>İlgilendiğiniz hisseleri takip edin ve anlık fiyatları görüntüleyin.</p>
+        <h3>Stock Tracking</h3>
+        <p>Track the stocks you're interested in and view real-time prices.</p>
       </div>
       
       <div class="feature-card">
-        <h3>Portföy Yönetimi</h3>
-        <p>Yatırımlarınızı tek bir yerden yönetin ve performansını izleyin.</p>
+        <h3>Portfolio Management</h3>
+        <p>Manage your investments from one place and monitor their performance.</p>
       </div>
       
       <div class="feature-card">
-        <h3>Piyasa Analizleri</h3>
-        <p>Güncel piyasa analizleri ve finansal haberlerle bilgi sahibi olun.</p>
+        <h3>Market Analysis</h3>
+        <p>Stay informed with current market analyses and financial news.</p>
       </div>
     </div>
   </div>

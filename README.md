@@ -1,71 +1,71 @@
-# StockMarket Projesi
+# StockMarket Project
 
-Bu proje, .NET 8 tabanlı bir gRPC servisi ve Vue.js kullanan bir web arayüzünden oluşan borsa uygulamasıdır.
+This project is a stock market application consisting of a .NET 8-based gRPC service and a web interface using Vue.js.
 
-## Proje Bileşenleri
+## Project Components
 
-- **StockMarket.GrpcService**: Hisse senedi verileri sağlayan gRPC servisi
-- **StockMarket.Web**: Vue.js tabanlı web arayüzü
-- **StockMarket.AppHost**: Aspire tabanlı dağıtılmış uygulama ana projesi
-- **StockMarket.ServiceDefaults**: Servis yapılandırma ayarları için paylaşılan proje
+- **StockMarket.GrpcService**: gRPC service providing stock data
+- **StockMarket.Web**: Vue.js-based web interface
+- **StockMarket.AppHost**: Aspire-based distributed application host project
+- **StockMarket.ServiceDefaults**: Shared project for service configuration settings
 
-## Başlangıç
+## Getting Started
 
-### Gereksinimler
+### Requirements
 
 - .NET 8 SDK
-- Node.js 16+ ve npm
-- Protobuf derleyicisi
+- Node.js 16+ and npm
+- Protobuf compiler
 
-### Kurulum
+### Installation
 
-1. Projeyi klonlayın:
+1. Clone the project:
 ```bash
 git clone https://github.com/yourusername/StockMarket.git
 cd StockMarket
 ```
 
-2. Bağımlılıkları yükleyin:
+2. Install dependencies:
 ```bash
-# .NET bağımlılıklarını yükleyin
+# Install .NET dependencies
 dotnet restore
 
-# Vue.js bağımlılıklarını yükleyin
+# Install Vue.js dependencies
 cd StockMarket.Web
 npm install
 ```
 
-3. Proto dosyalarını derleyin:
+3. Compile proto files:
 ```bash
 cd StockMarket.Web
 npm run proto:gen
 ```
 
-### Uygulamayı Çalıştırma
+### Running the Application
 
 ```bash
 cd /path/to/StockMarket
 dotnet run --project StockMarket.AppHost
 ```
 
-Uygulama şu adreslerde çalışacaktır:
-- gRPC Servisi: http://localhost:5207
-- Web Arayüzü: http://localhost:5173
+The application will run at:
+- gRPC Service: http://localhost:5207
+- Web Interface: http://localhost:5173
 
-## Özellikler
+## Features
 
-- Hisse senedi listesi görüntüleme
-- Hisse senedi detay sayfası
-- Gerçek zamanlı hisse senedi veri akışı (SSE)
-- Hisse senedi fiyat grafiği
+- Stock list viewing
+- Stock detail page
+- Real-time stock data stream (SSE)
+- Stock price chart
 
-## Teknolojiler
+## Technologies
 
 - **Backend**:
   - .NET 8
   - gRPC
   - Server-Sent Events (SSE)
-  - Aspire (dağıtılmış uygulama çerçevesi)
+  - Aspire (distributed application framework)
 
 - **Frontend**:
   - Vue.js 3
@@ -74,6 +74,6 @@ Uygulama şu adreslerde çalışacaktır:
   - Axios
   - gRPC-Web
 
-## Lisans
+## License
 
 MIT 

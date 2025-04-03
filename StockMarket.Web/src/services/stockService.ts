@@ -13,37 +13,37 @@ export interface Stock {
   lastUpdated: string;
 }
 
-// gRPC servisi oluştur
+// Create gRPC service
 const stockGrpcService = createStockService();
 
 const stockService = {
   async getAllStocks(): Promise<Stock[]> {
     try {
-      console.log('getAllStocks çağrıldı, gRPC servisi ile veri alınıyor');
-      // gRPC servisi üzerinden stokları al
+      console.log('getAllStocks called, getting data via gRPC service');
+      // Get stocks via gRPC service
       const stocks = await stockGrpcService.getStocks({});
       return stocks;
     } catch (error) {
-      console.error('Hisse senetleri alınırken hata oluştu:', error);
+      console.error('Error getting stocks:', error);
       throw error;
     }
   },
 
   async getStockBySymbol(symbol: string): Promise<Stock | undefined> {
     try {
-      console.log(`getStockBySymbol çağrıldı: ${symbol}`);
-      // gRPC servisi üzerinden belirli bir hisseyi al
+      console.log(`getStockBySymbol called: ${symbol}`);
+      // Get specific stock via gRPC service
       const stocks = await stockGrpcService.getStocks({ symbols: [symbol] });
       return stocks[0];
     } catch (error) {
-      console.error(`${symbol} sembolü için hisse senedi alınırken hata oluştu:`, error);
+      console.error(`Error getting stock for symbol ${symbol}:`, error);
       throw error;
     }
   },
   
-  // Stream aboneliği için metod
+  // Method for stream subscription
   subscribeToStockUpdates(symbols: string[], callback: (stock: Stock) => void): () => void {
-    console.log(`Stream aboneliği başlatılıyor, semboller: ${symbols.join(', ')}`);
+    console.log(`Starting stream subscription, symbols: ${symbols.join(', ')}`);
     return stockGrpcService.subscribeToStockUpdates({ symbols }, (update) => {
       callback(update.stock);
     });

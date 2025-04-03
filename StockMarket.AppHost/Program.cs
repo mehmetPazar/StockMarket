@@ -1,14 +1,14 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// gRPC Servisi doğrudan dışarıya açık olacak şekilde yapılandır
+// Configure gRPC Service to be externally accessible
 var grpcService = builder.AddProject<Projects.StockMarket_GrpcService>("grpcservice")
-    .WithExternalHttpEndpoints(); // gRPC servisi dışarıdan erişilebilir olsun
+    .WithExternalHttpEndpoints(); // Make gRPC service accessible from outside
 
-// Web uygulaması (Vue.js)
+// Web application (Vue.js)
 builder.AddNpmApp("webfrontend", "../StockMarket.Web")
     .WithReference(grpcService)
     .WithHttpEndpoint(8081, 5173, isProxied: true);
 
-// Not: StockMarket.Web ve StockMarket.ApiGateway projeleri yapıdan kaldırıldı
+// Note: StockMarket.Web and StockMarket.ApiGateway projects have been removed from the structure
 
 builder.Build().Run();

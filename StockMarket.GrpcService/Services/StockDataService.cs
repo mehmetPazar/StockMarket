@@ -7,7 +7,7 @@ public class StockDataService
     private readonly ILogger<StockDataService> _logger;
     private static readonly Random _random = new Random();
     
-    // Desteklenen hisse senetleri ve statik bilgileri
+    // Supported stocks and their static information
     private static readonly Dictionary<string, StockInfo> _stocks = new Dictionary<string, StockInfo>
     {
         ["AAPL"] = new StockInfo { Symbol = "AAPL", CompanyName = "Apple Inc.", BasePrice = 175.50, PreviousClose = 173.75 },
@@ -38,19 +38,19 @@ public class StockDataService
         
         if (!_stocks.TryGetValue(symbol, out var stockInfo))
         {
-            throw new KeyNotFoundException($"Hisse senedi bulunamadı: {symbol}");
+            throw new KeyNotFoundException($"Stock not found: {symbol}");
         }
         
-        // Geçerli fiyat ve değişim değerleri hesaplanır
+        // Calculate current price and change values
         var currentTime = DateTime.Now.Ticks / 10000000.0;
         
-        // Daha belirgin değişimler için faktörü artırdık
+        // Increased factor for more noticeable changes
         var noise = Math.Sin(currentTime) * 0.03 + 
                    Math.Sin(currentTime * 0.5) * 0.02 + 
-                   ((_random.NextDouble() * 0.04) - 0.02); // -%2 ile +%2 arası rastgele değişim
+                   ((_random.NextDouble() * 0.04) - 0.02); // Random change between -2% and +2%
         
-        // Her sembol için hafif farklı değişim uygula (sembol bazlı tutarlı rastgelelik)
-        var symbolFactor = symbol[0] % 5 * 0.01; // Sembolün ilk harfine göre 0 ile 0.04 arası ek faktör
+        // Apply slightly different change for each symbol (symbol-based consistent randomness)
+        var symbolFactor = symbol[0] % 5 * 0.01; // Additional factor between 0 and 0.04 based on first letter of symbol
         noise += symbolFactor * Math.Sin(currentTime * 0.7);
         
         var currentPrice = stockInfo.BasePrice * (1 + noise);
@@ -78,37 +78,37 @@ public class StockDataService
     
     public IEnumerable<string> GetAllSymbols()
     {
-        _logger.LogInformation($"GetAllSymbols çağrıldı, {_stocks.Keys.Count} sembol bulundu: {string.Join(", ", _stocks.Keys)}");
+        _logger.LogInformation($"GetAllSymbols called, {_stocks.Keys.Count} symbols found: {string.Join(", ", _stocks.Keys)}");
         return _stocks.Keys;
     }
     
     private static string FormatMarketCap(double marketCap)
     {
-        if (marketCap >= 1_000_000_000_000) // Trilyon
+        if (marketCap >= 1_000_000_000_000) // Trillion
         {
             return $"{marketCap / 1_000_000_000_000:F2}T";
         }
-        else if (marketCap >= 1_000_000_000) // Milyar
+        else if (marketCap >= 1_000_000_000) // Billion
         {
             return $"{marketCap / 1_000_000_000:F2}B";
         }
-        else // Milyon
+        else // Million
         {
             return $"{marketCap / 1_000_000:F2}M";
         }
     }
     
-    // Hisse senedi temel bilgileri için yardımcı sınıf
+    // Helper class for stock basic information
     public class StockInfo
     {
         public string Symbol { get; set; } = "";
         public string CompanyName { get; set; } = "";
         public double BasePrice { get; set; }
         public double PreviousClose { get; set; }
-        public long OutstandingShares { get; set; } = 1_000_000_000; // Varsayılan
+        public long OutstandingShares { get; set; } = 1_000_000_000; // Default
     }
     
-    // Hisse senedi verisi dönüş sınıfı
+    // Stock data return class
     public class StockDto
     {
         public string Symbol { get; set; } = "";
